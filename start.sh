@@ -1,11 +1,5 @@
-#!/bin/bash
-
-# Crear y activar el entorno virtual
-python3 -m venv venv
-source venv/bin/activate
-
-# Instalar los requisitos
+mkdir server
+python3 -m http.server -d server &
 pip install -r requirements.txt
-
-# Ejecutar el script de prueba
-python test.py
+python3 test.py
+#!/bin/bash
