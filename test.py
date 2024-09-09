@@ -1,4 +1,7 @@
 from telethon import TelegramClient, events
+import requests
+from bs4 import BeautifulSoup
+import re
 import os
 import zipfile
 
@@ -70,6 +73,47 @@ def split_file(file_path, part_size):
             parts.append(part_file)
             part_num += 1
     return parts
+
+@client.on(events.NewMessage(pattern='/h3dl (.+)'))
+async def handler(event):
+    code = event.pattern_match.group(1)
+    url = f'https://www/d/{code}'
+    
+    # Accede a la página web
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    # Captura y edita el nombre de la página
+    page_title = soup.title.string
+    edited_title = re.sub(r'[^a-zA-Z0-9\[\]]', '', page_title) + f'({code})'
+    
+    # Enlista las fotos de la página
+    img_tags = soup.find_all('img')
+    img_urls = [img['src'].replace('t.jpg', '.jpg') for img in img_tags if 't.jpg' in img['src']]
+    
+    # Descarga las fotos
+    img_dir = f'images_{code}'
+    os.makedirs(img_dir, exist_ok=True)
+    for i, img_url in enumerate(img_urls):
+        img_data = requests.get(img_url).content
+        with open(os.path.join(img_dir, f'image_{i}.jpg'), 'wb') as img_file:
+            img_file.write(img_data)
+    
+    # Crea un archivo CBZ
+    cbz_filename = f'{edited_title}.cbz'
+    with zipfile.ZipFile(cbz_filename, 'w') as cbz_file:
+        for img_file in os.listdir(img_dir):
+            cbz_file.write(os.path.join(img_dir, img_file), img_file)
+    
+    # Envía el archivo CBZ
+    await client.send_file(event.chat_id, cbz_filename)
+    
+    # Limpia los archivos temporales
+    os.remove(cbz_filename)
+    for img_file in os.listdir(img_dir):
+        os.remove(os.path.join(img_dir, img_file))
+    os.rmdir(img_dir)
+
 
 client.start()
 client.run_until_disconnected()
