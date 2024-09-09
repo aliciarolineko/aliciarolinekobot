@@ -74,10 +74,15 @@ def split_file(file_path, part_size):
             part_num += 1
     return parts
 
-@client.on(events.NewMessage(pattern='/h3dl (.+)'))
+@client.on(events.NewMessage(pattern='/h3dl ?(.*)'))
 async def handler(event):
-    code = event.pattern_match.group(1)
-    url = f'https://www/d/{code}'
+    code = event.pattern_match.group(1).strip()
+    
+    if not code:
+        await event.reply("Es necesario escribir un código")
+        return
+    
+    url = f'https://es.3hentai.net/d/{code}'
     
     # Accede a la página web
     response = requests.get(url)
@@ -113,7 +118,6 @@ async def handler(event):
     for img_file in os.listdir(img_dir):
         os.remove(os.path.join(img_dir, img_file))
     os.rmdir(img_dir)
-
-
+    
 client.start()
 client.run_until_disconnected()
