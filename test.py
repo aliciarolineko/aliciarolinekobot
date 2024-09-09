@@ -94,7 +94,7 @@ async def handler(event):
     
     # Enlista las fotos de la página
     img_tags = soup.find_all('img')
-    img_urls = [img['src'].replace('t.jpg', '.jpg') for img in img_tags if 't.jpg' in img['src']]
+    img_urls = [img['src'].replace('t.jpg', '.jpg') for img in img_tags if img.get('src') and 't.jpg' in img['src']]
     
     # Descarga las fotos
     img_dir = f'images_{code}'
