@@ -6,9 +6,9 @@ import os
 import zipfile
 
 # Configura tu API ID y Hash aquí
-api_id = '21441504'
-api_hash = 'd4f0a90c121e84d3d812eaed96b58e2e'
-bot_token = '7283759114:AAHzCm4o_Trsc0tq8NHSphlpW2cF6TsayVI'
+api_id = os.getenv('API_ID')
+api_hash = os.getenv('API_HASH')
+bot_token = os.getenv('TOKEN')
 
 client = TelegramClient('bot', api_id, api_hash).start(bot_token=bot_token)
 
