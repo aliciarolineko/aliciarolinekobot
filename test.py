@@ -93,8 +93,8 @@ async def handler(event):
     edited_title = re.sub(r'[^a-zA-Z0-9\[\]]', '', page_title) + f'({code})'
     
     # Enlista las fotos de la página
-    img_tags = soup.find_all('img')
-    img_urls = [img['src'].replace('t.jpg', '.jpg') for img in img_tags if img.get('src') and 't.jpg' in img['src']]
+    a_tags = soup.find_all('a')
+    img_urls = [a['href'].replace('t.jpg', '.jpg') for a in a_tags if a.get('href') and a['href'].endswith('.jpg')]
     
     # Descarga las fotos
     img_dir = f'images_{code}'
@@ -106,9 +106,7 @@ async def handler(event):
     
     # Crea un archivo CBZ
     cbz_filename = f'{edited_title}.cbz'
-    with zipfile.ZipFile(cbz_filename, 'w') as cbz_file:
-        for img_file in os.listdir(img_dir):
-            cbz_file.write(os.path.join(img_dir, img_file), img_file)
+    os.system(f'zip -r {cbz_filename} {img_dir}')
     
     # Envía el archivo CBZ
     await client.send_file(event.chat_id, cbz_filename)
@@ -118,6 +116,7 @@ async def handler(event):
     for img_file in os.listdir(img_dir):
         os.remove(os.path.join(img_dir, img_file))
     os.rmdir(img_dir)
+    
     
 client.start()
 client.run_until_disconnected()
