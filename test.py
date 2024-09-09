@@ -4,6 +4,12 @@ from bs4 import BeautifulSoup
 import re
 import os
 import zipfile
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+
 
 # Configura tu API ID y Hash aquí
 api_id = os.getenv('API_ID')
@@ -116,7 +122,67 @@ async def handler(event):
     for img_file in os.listdir(img_dir):
         os.remove(os.path.join(img_dir, img_file))
     os.rmdir(img_dir)
-    
+
+# Variables de entorno para las credenciales de Disroot
+DISMAIL = os.getenv('DISMAIL')
+DISPASS = os.getenv('DISPASS')
+
+@client.on(events.NewMessage(pattern='/send (.+)'))
+async def handler(event):
+    if event.is_reply:
+        recipient_email = event.pattern_match.group(1)
+        if not recipient_email:
+            await event.reply("Debe proporcionar el destinatario")
+            return
+        
+        # Obtener el mensaje o archivo al que se responde
+        reply_message = await event.get_reply_message()
+        if not reply_message:
+            await event.reply("Debe responder a un mensaje")
+            return
+        
+        # Conectar al servidor SMTP de Disroot
+        try:
+            server = smtplib.SMTP('disroot.org', 587)
+            server.starttls()
+            server.login(DISMAIL, DISPASS)
+            
+            # Crear el correo
+            msg = MIMEMultipart()
+            msg['From'] = DISMAIL
+            msg['To'] = recipient_email
+            msg['Subject'] = "Mensaje desde Telegram"
+            
+            if reply_message.media:
+                # Si el mensaje tiene un archivo adjunto
+                file = await reply_message.download_media()
+                if os.path.getsize(file) > 11 * 1024 * 1024:  # 11MB en bytes
+                    await event.reply("No puedes enviar este archivo, debe ser menor a 11MB")
+                    return
+                
+                attachment = open(file, 'rb')
+                
+                part = MIMEBase('application', 'octet-stream')
+                part.set_payload(attachment.read())
+                encoders.encode_base64(part)
+                part.add_header('Content-Disposition', f"attachment; filename= {file}")
+                
+                msg.attach(part)
+            else:
+                # Si el mensaje es solo texto
+                body = reply_message.message
+                msg.attach(MIMEText(body, 'plain'))
+            
+            # Enviar el correo
+            server.sendmail(DISMAIL, recipient_email, msg.as_string())
+            server.quit()
+            
+            await event.reply("Mensaje enviado correctamente")
+        except Exception as e:
+            await event.reply(f"Error al enviar el mensaje: {str(e)}")
+    else:
+        await event.reply("Debe responder a un mensaje")
+                  
     
 client.start()
 client.run_until_disconnected()
