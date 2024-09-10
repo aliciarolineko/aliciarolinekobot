@@ -120,7 +120,7 @@ async def download_images(event):
         await event.reply("No puedes enviar el comando vacío")
         return
 
-    url = f"https://es.3hen.net/d/{code}"
+    url = f"https://es.3hentai.net/d/{code}"
 
     try:
         response = requests.get(url)
