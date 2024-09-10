@@ -20,6 +20,18 @@ client = TelegramClient('bot', api_id, api_hash).start(bot_token=bot_token)
 
 print("El bot se ha iniciado, para detenerlo pulse CTRL+C")
 
+@client.on(events.NewMessage)
+async def handler(event):
+    sender = await event.get_sender()
+    username = sender.username
+
+    if username not in allowed_users:
+        await event.reply('No tienes permitido usar este Bot')
+        return
+
+# Obtener la lista de usuarios permitidos desde la variable de entorno
+allowed_users = os.getenv('USERS').split(',')
+
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
     await event.respond('Funcionando🙃')
