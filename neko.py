@@ -20,14 +20,6 @@ client = TelegramClient('bot', api_id, api_hash).start(bot_token=bot_token)
 
 print("El bot se ha iniciado, para detenerlo pulse CTRL+C")
 
-@client.on(events.NewMessage)
-async def handler(event):
-    sender = await event.get_sender()
-    username = sender.username
-
-    if username not in allowed_users:
-        await event.reply('No tienes permitido usar este Bot')
-        return
 
 # Obtener la lista de usuarios permitidos desde la variable de entorno
 allowed_users = os.getenv('USERS').split(',')
@@ -38,7 +30,6 @@ async def start(event):
     username = sender.username
 
     if username not in allowed_users:
-        await event.reply('No tienes permitido usar este Bot')
         return
     await event.respond('Funcionando🙃')
 
@@ -48,7 +39,6 @@ async def compress(event):
     username = sender.username
 
     if username not in allowed_users:
-        await event.reply('No tienes permitido usar este Bot')
         return
     if event.is_reply:
         reply_message = await event.get_reply_message()
@@ -76,7 +66,6 @@ async def rename(event):
     username = sender.username
 
     if username not in allowed_users:
-        await event.reply('No tienes permitido usar este Bot')
         return
     if event.is_reply:
         reply_message = await event.get_reply_message()
@@ -186,7 +175,6 @@ async def send_mail(event):
     username = sender.username
 
     if username not in allowed_users:
-        await event.reply('No tienes permitido usar este Bot')
         return
 
     if username not in user_emails:
@@ -246,3 +234,4 @@ async def send_mail(event):
     
 client.start()
 client.run_until_disconnected()
+    
