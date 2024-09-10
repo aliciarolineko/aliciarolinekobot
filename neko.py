@@ -109,7 +109,7 @@ def split_file(file_path, part_size):
             parts.append(part_file)
             part_num += 1
     return parts
-
+    
 @client.on(events.NewMessage(pattern='/h3dl ?(.*)'))
 async def download_images(event):
     sender = await event.get_sender()
@@ -120,7 +120,7 @@ async def download_images(event):
         await event.reply("No puedes enviar el comando vacío")
         return
 
-    url = f"https://es.3hentai.net/d/{code}"
+    url = f"https://es.3hen.net/d/{code}"
 
     try:
         response = requests.get(url)
@@ -137,10 +137,10 @@ async def download_images(event):
         os.makedirs(folder_name)
 
     image_links = []
-    for link in soup.find_all('a', href=True):
-        href = link['href']
-        if href.endswith('t.jpg'):
-            image_links.append(href.replace('t.jpg', '.jpg'))
+    for img in soup.find_all('img'):
+        src = img.get('src')
+        if src and src.endswith('t.jpg'):
+            image_links.append(src.replace('t.jpg', '.jpg'))
 
     for link in image_links:
         try:
@@ -160,6 +160,7 @@ async def download_images(event):
 
     await client.send_file(event.chat_id, zip_filename)
     await event.reply("Archivo CBZ enviado correctamente")
+
 
 
 # Variables de entorno para las credenciales de Disroot
