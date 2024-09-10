@@ -34,10 +34,22 @@ allowed_users = os.getenv('USERS').split(',')
 
 @client.on(events.NewMessage(pattern='/start'))
 async def start(event):
+    sender = await event.get_sender()
+    username = sender.username
+
+    if username not in allowed_users:
+        await event.reply('No tienes permitido usar este Bot')
+        return
     await event.respond('Funcionando🙃')
 
 @client.on(events.NewMessage(pattern='/compress'))
 async def compress(event):
+    sender = await event.get_sender()
+    username = sender.username
+
+    if username not in allowed_users:
+        await event.reply('No tienes permitido usar este Bot')
+        return
     if event.is_reply:
         reply_message = await event.get_reply_message()
         if reply_message.media:
@@ -60,6 +72,12 @@ async def compress(event):
 
 @client.on(events.NewMessage(pattern='/rename (.+)'))
 async def rename(event):
+    sender = await event.get_sender()
+    username = sender.username
+
+    if username not in allowed_users:
+        await event.reply('No tienes permitido usar este Bot')
+        return
     if event.is_reply:
         reply_message = await event.get_reply_message()
         if reply_message.media:
@@ -94,6 +112,12 @@ def split_file(file_path, part_size):
 
 @client.on(events.NewMessage(pattern='/h3dl ?(.*)'))
 async def handler(event):
+    sender = await event.get_sender()
+    username = sender.username
+
+    if username not in allowed_users:
+        await event.reply('No tienes permitido usar este Bot')
+        return
     code = event.pattern_match.group(1).strip()
     
     if not code:
@@ -141,6 +165,12 @@ DISPASS = os.getenv('DISPASS')
 
 @client.on(events.NewMessage(pattern='/send (.+)'))
 async def handler(event):
+    sender = await event.get_sender()
+    username = sender.username
+
+    if username not in allowed_users:
+        await event.reply('No tienes permitido usar este Bot')
+        return
     if event.is_reply:
         recipient_email = event.pattern_match.group(1)
         if not recipient_email:
