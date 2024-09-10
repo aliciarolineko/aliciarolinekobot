@@ -26,7 +26,6 @@ async def handler(event):
     username = sender.username
 
     if username not in allowed_users:
-        await event.reply('No tienes permitido usar este Bot')
         return
 
 # Obtener la lista de usuarios permitidos desde la variable de entorno
