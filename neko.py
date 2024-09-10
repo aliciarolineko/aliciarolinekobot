@@ -26,6 +26,7 @@ async def handler(event):
     username = sender.username
 
     if username not in allowed_users:
+        await event.reply('No tienes permitido usar este Bot')
         return
 
 # Obtener la lista de usuarios permitidos desde la variable de entorno
@@ -110,114 +111,131 @@ def split_file(file_path, part_size):
     return parts
 
 @client.on(events.NewMessage(pattern='/h3dl ?(.*)'))
-async def handler(event):
+async def download_images(event):
     sender = await event.get_sender()
     username = sender.username
+    code = event.pattern_match.group(1)
 
-    if username not in allowed_users:
-        await event.reply('No tienes permitido usar este Bot')
-        return
-    code = event.pattern_match.group(1).strip()
-    
     if not code:
-        await event.reply("Es necesario escribir un código")
+        await event.reply("No puedes enviar el comando vacío")
         return
-    
-    url = f'https://es.3hentai.net/d/{code}'
-    
-    # Accede a la página web
-    response = requests.get(url)
+
+    url = f"https://es.3hentai.net/d/{code}"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        await event.reply(f"Error al acceder a la página: {str(e)}")
+        return
+
     soup = BeautifulSoup(response.content, 'html.parser')
-    
-    # Captura y edita el nombre de la página
-    page_title = soup.title.string
-    edited_title = re.sub(r'[^a-zA-Z0-9\[\]]', '', page_title) + f'({code})'
-    
-    # Enlista las fotos de la página
-    a_tags = soup.find_all('a')
-    img_urls = [a['href'].replace('t.jpg', '.jpg') for a in a_tags if a.get('href') and a['href'].endswith('.jpg')]
-    
-    # Descarga las fotos
-    img_dir = f'images_{code}'
-    os.makedirs(img_dir, exist_ok=True)
-    for i, img_url in enumerate(img_urls):
-        img_data = requests.get(img_url).content
-        with open(os.path.join(img_dir, f'image_{i}.jpg'), 'wb') as img_file:
-            img_file.write(img_data)
-    
-    # Crea un archivo CBZ
-    cbz_filename = f'{edited_title}.cbz'
-    os.system(f'zip -r {cbz_filename} {img_dir}')
-    
-    # Envía el archivo CBZ
-    await client.send_file(event.chat_id, cbz_filename)
-    
-    # Limpia los archivos temporales
-    os.remove(cbz_filename)
-    for img_file in os.listdir(img_dir):
-        os.remove(os.path.join(img_dir, img_file))
-    os.rmdir(img_dir)
+    page_title = soup.title.string if soup.title else "sin_titulo"
+    folder_name = re.sub(r'[\\/*?:"<>|]', "", page_title)
+
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+
+    image_links = []
+    for link in soup.find_all('a', href=True):
+        href = link['href']
+        if href.endswith('t.jpg'):
+            image_links.append(href.replace('t.jpg', '.jpg'))
+
+    for link in image_links:
+        try:
+            img_data = requests.get(link).content
+            img_name = os.path.join(folder_name, os.path.basename(link))
+            with open(img_name, 'wb') as handler:
+                handler.write(img_data)
+        except Exception as e:
+            await event.reply(f"Error al descargar el archivo {link}: {str(e)}")
+            return
+
+    zip_filename = f"{folder_name}.cbz"
+    with zipfile.ZipFile(zip_filename, 'w') as zipf:
+        for root, _, files in os.walk(folder_name):
+            for file in files:
+                zipf.write(os.path.join(root, file), arcname=file)
+
+    await client.send_file(event.chat_id, zip_filename)
+    await event.reply("Archivo CBZ enviado correctamente")
+
 
 # Variables de entorno para las credenciales de Disroot
 DISMAIL = os.getenv('DISMAIL')
 DISPASS = os.getenv('DISPASS')
 
-@client.on(events.NewMessage(pattern='/send (.+)'))
-async def handler(event):
+# Diccionario para almacenar los correos electrónicos de los usuarios
+user_emails = {}
+
+@client.on(events.NewMessage(pattern='/setmail (.+)'))
+async def set_mail(event):
+    sender = await event.get_sender()
+    username = sender.username
+    email = event.pattern_match.group(1)
+    
+    # Registrar el correo electrónico del usuario
+    user_emails[username] = email
+    await event.reply(f"Correo electrónico {email} registrado para el usuario @{username}")
+
+@client.on(events.NewMessage(pattern='/send'))
+async def send_mail(event):
     sender = await event.get_sender()
     username = sender.username
 
     if username not in allowed_users:
         await event.reply('No tienes permitido usar este Bot')
         return
+
+    if username not in user_emails:
+        await event.reply("Use /setmail para registrar su correo")
+        return
+
+    recipient_email = user_emails[username]
+
     if event.is_reply:
-        recipient_email = event.pattern_match.group(1)
-        if not recipient_email:
-            await event.reply("Debe proporcionar el destinatario")
-            return
-        
         # Obtener el mensaje o archivo al que se responde
         reply_message = await event.get_reply_message()
         if not reply_message:
             await event.reply("Debe responder a un mensaje")
             return
-        
+
         # Conectar al servidor SMTP de Disroot
         try:
             server = smtplib.SMTP('disroot.org', 587)
             server.starttls()
             server.login(DISMAIL, DISPASS)
-            
+
             # Crear el correo
             msg = MIMEMultipart()
             msg['From'] = DISMAIL
             msg['To'] = recipient_email
             msg['Subject'] = "Mensaje desde Telegram"
-            
+
             if reply_message.media:
                 # Si el mensaje tiene un archivo adjunto
                 file = await reply_message.download_media()
                 if os.path.getsize(file) > 11 * 1024 * 1024:  # 11MB en bytes
                     await event.reply("No puedes enviar este archivo, debe ser menor a 11MB")
                     return
-                
+
                 attachment = open(file, 'rb')
-                
+
                 part = MIMEBase('application', 'octet-stream')
                 part.set_payload(attachment.read())
                 encoders.encode_base64(part)
                 part.add_header('Content-Disposition', f"attachment; filename= {file}")
-                
+
                 msg.attach(part)
             else:
-                # Si el mensaje es solo texto
-                body = reply_message.message
-                msg.attach(MIMEText(body, 'plain'))
-            
+                await event.reply("Solo se pueden enviar archivos, videos, audios y fotos, no texto.")
+                return
+
             # Enviar el correo
             server.sendmail(DISMAIL, recipient_email, msg.as_string())
             server.quit()
-            
+
             await event.reply("Mensaje enviado correctamente")
         except Exception as e:
             await event.reply(f"Error al enviar el mensaje: {str(e)}")
