@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import re
 import os
 import zipfile
+import shutil
 import py7zr
 import smtplib
 from email.mime.multipart import MIMEMultipart
