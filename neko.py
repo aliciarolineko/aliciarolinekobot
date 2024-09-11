@@ -106,18 +106,6 @@ def split_file(file_path, part_size):
             parts.append(part_file)
             part_num += 1
     return parts
-'/start'))
-async def start(event):
-    sender = await event.get_sender()
-    username = sender.username
-
-    if username not in allowed_users:
-        return
-    await event.respond('Funcionando🙃')
-
-
-
-
     
 
 command_in_use2 = False
@@ -145,7 +133,7 @@ async def rename(event):
                 await event.respond("Descargando el archivo para renombrarlo...")
                 new_name = event.pattern_match.group(1)
                 file_path = await client.download_media(reply_message.media)
-                new_file_path = os.path.join(os.path.dirname(file_path), new_name)
+                new_file_path = os.path.join(os.path.diname(file_path), new_name)
                 os.rename(file_path, new_file_path)
                 await event.respond("Subiendo el archivo con nuevo nombre...")
                 await client.send_file(event.chat_id, new_file_path, force_document=True)
@@ -180,6 +168,8 @@ h3_in_use = False
 def clean_string(input_string):
     return ''.join(char for char in input_string if char.isalnum() or char in '[]')
 
+
+
 @client.on(events.NewMessage(pattern='/h3dl ?(.*)'))
 async def download_images(event):
     global h3_in_use
@@ -200,7 +190,7 @@ async def download_images(event):
     total_codes = len(codes)
     for index, code in enumerate(codes, start=1):
         code = clean_string(code.strip())
-        url = f"https://es.3hentai.net/d/{code}"
+        url = f"https://es.3hent.net/d/{code}"
 
         try:
             response = requests.get(url)
@@ -229,11 +219,12 @@ async def download_images(event):
                 img_name = os.path.join(folder_name, os.path.basename(link))
                 with open(img_name, 'wb') as handler:
                     handler.write(img_data)
-                await event.reply(f"Descargando {code} (Progreso {index}/{total_codes})")
             except Exception as e:
                 await event.reply(f"Error al descargar el archivo {link}: {str(e)}")
                 h3_in_use = False
                 return
+
+        await event.reply(f"Descargando {code} (Progreso {index}/{total_codes})")
 
         zip_filename = f"{folder_name}.cbz"
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
@@ -246,6 +237,9 @@ async def download_images(event):
 
     await event.reply("Todos los archivos CBZ han sido enviados correctamente")
     h3_in_use = False
+    
+
+
 
 
 
