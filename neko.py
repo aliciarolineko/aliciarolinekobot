@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 import re
 import os
 import zipfile
-import shutil
 import py7zr
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -191,7 +190,7 @@ async def download_images(event):
     total_codes = len(codes)
     for index, code in enumerate(codes, start=1):
         code = clean_string(code.strip())
-        url = f"https://es.3hent.net/d/{code}"
+        url = f"https://es.3hentai.net/d/{code}"
 
         try:
             response = requests.get(url)
