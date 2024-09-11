@@ -26,16 +26,7 @@ print("El bot se ha iniciado, para detenerlo pulse CTRL+C")
 # Obtener la lista de usuarios permitidos desde la variable de entorno
 allowed_users = os.getenv('USERS').split(',')
 
-@client.on(events.NewMessage(pattern='/start'))
-async def start(event):
-    sender = await event.get_sender()
-    username = sender.username
-
-    if username not in allowed_users:
-        return
-    await event.respond('Funcionando🙃')
-
-compress_in_progress = False
+@client.on(events.NewMessage(pattern=compress_in_progress = False
 
 @client.on(events.NewMessage(pattern='/compress'))
 async def compress(event):
@@ -72,7 +63,7 @@ async def compress(event):
                     archive.write(file_path, os.path.basename(file_path))
 
                 # Dividir archivo comprimido
-                parts = split_file(compressed_file, 10 * 1024 * 1024, start_index=1)
+                parts = split_file(compressed_file, 10 * 1024 * 1024)
                 await event.respond(f"Se ha comprimido el archivo en {len(parts)} partes, ahora se enviarán")
 
                 # Enviar partes
@@ -92,10 +83,10 @@ async def compress(event):
     else:
         await event.respond('Ejecute el comando respondiendo a un archivo')
 
-def split_file(file_path, part_size, start_index=1):
+def split_file(file_path, part_size):
     parts = []
     with open(file_path, 'rb') as f:
-        part_num = start_index
+        part_num = 1
         while True:
             part_data = f.read(part_size)
             if not part_data:
@@ -106,7 +97,16 @@ def split_file(file_path, part_size, start_index=1):
             parts.append(part_file)
             part_num += 1
     return parts
-compress_in_progress = False
+'/start'))
+async def start(event):
+    sender = await event.get_sender()
+    username = sender.username
+
+    if username not in allowed_users:
+        return
+    await event.respond('Funcionando🙃')
+
+
 
 
     
