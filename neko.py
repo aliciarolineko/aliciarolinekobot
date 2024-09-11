@@ -10,7 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
-
+from moodleclient import upload_token
 
 
 # Configura tu API ID y Hash aquí
@@ -146,6 +146,25 @@ async def rename(event):
         await event.respond('Ejecute el comando respondiendo a un archivo')
 
     command_in_use = False
+
+@client.on(events.NewMessage(pattern='/up'))
+async def upmoodle(event):
+
+    sender = await event.get_sender()
+    username = sender.username
+    if username not in allowed_users:
+        return
+    if event.is_reply:
+        reply_message = await event.get_reply_message()
+        if reply_message.media:
+            try:
+                await event.respond("Descargando el archivo para subir a moodle...")
+                filename = await client.download_media(reply_message.media)
+                await event.respond("Subiendo el archivo...")
+                link = upload_token(filename, "d68a63e9d524b62529133ff46268d331", "https://cursad.jovenclub.cu")
+                await event.respond("Enlace:\n\n"+link)
+            except Exception as ex:
+                await event.respond(ex)
 
 def split_file(file_path, part_size):
     parts = []
