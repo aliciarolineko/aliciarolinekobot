@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import re
 import os
 import zipfile
+import py7zr
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -62,12 +63,12 @@ async def compress(event):
 
                 # Descargar archivo
                 file_path = await client.download_media(reply_message.media, file=temp_dir)
-                compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.rar')
+                compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
 
                 await event.respond("Comprimiendo el archivo...")
 
                 # Comprimir archivo
-                with zipfile.ZipFile(compressed_file, 'w') as archive:
+                with py7zr.SevenZipFile(compressed_file, 'w') as archive:
                     archive.write(file_path, os.path.basename(file_path))
 
                 # Dividir archivo comprimido
@@ -105,6 +106,9 @@ def split_file(file_path, part_size, start_index=1):
             parts.append(part_file)
             part_num += 1
     return parts
+compress_in_progress = False
+
+
     
 
 command_in_use2 = False
