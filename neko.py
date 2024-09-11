@@ -26,7 +26,16 @@ print("El bot se ha iniciado, para detenerlo pulse CTRL+C")
 # Obtener la lista de usuarios permitidos desde la variable de entorno
 allowed_users = os.getenv('USERS').split(',')
 
-@client.on(events.NewMessage(pattern=compress_in_progress = False
+@client.on(events.NewMessage(pattern='/start'))
+async def start(event):
+    sender = await event.get_sender()
+    username = sender.username
+
+    if username not in allowed_users:
+        return
+    await event.respond('Funcionando🙃')
+
+compress_in_progress = False
 
 @client.on(events.NewMessage(pattern='/compress'))
 async def compress(event):
