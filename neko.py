@@ -187,6 +187,7 @@ async def compress(event):
 
                 await event.respond("Esas son todas las partes")
                 os.system("rm -rf server")
+                os.systen("mkdir server")
                 clear_folder("server")
             
                 # Limpiar archivos temporales
