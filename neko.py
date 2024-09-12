@@ -35,6 +35,59 @@ async def start(event):
         return
     await event.respond('Funcionando🙃')
 
+
+
+command_rename = False
+
+@client.on(events.NewMessage(pattern='/rename (.+)'))
+async def rename(event):
+    global command_rename
+
+    sender = await event.get_sender()
+    username = sender.username
+
+    if username not in allowed_users:
+        return
+
+    if command_rename:
+        await event.respond("El comando está en uso actualmente, espere un poco🙃")
+        return
+
+    command_rename = True
+
+    if event.is_reply:
+        reply_message = await event.get_reply_message()
+        if reply_message.media:
+            try:
+                await event.respond("Descargando el archivo para renombrarlo...")
+                new_name = event.pattern_match.group(1)
+                file_path = await client.download_media(reply_message.media)
+                new_file_path = os.path.join(os.path.diname(file_path), new_name)
+                os.rename(file_path, new_file_path)
+                await event.respond("Subiendo el archivo con nuevo nombre...")
+                await client.send_file(event.chat_id, new_file_path, force_document=True)
+                os.remove(new_file_path)
+            except Exception as e:
+                await event.respond(f'Error: {str(e)}')
+        else:
+            await event.respond('Ejecute el comando respondiendo a un archivo')
+    else:
+        await event.respond('Ejecute el comando respondiendo a un archivo')
+
+    command_rename = False
+
+
+
+
+
+
+
+
+
+
+
+
+
 compress_in_progress = False
 
 user_comp = {}
@@ -77,6 +130,12 @@ def clear_folder(folder):
                     shutil.rmtree(file_path)
             except Exception as e:
                 print(e)
+
+
+
+
+
+
 
 @client.on(events.NewMessage(pattern='/compress'))
 async def compress(event):
@@ -156,6 +215,18 @@ def split_file(file_path, part_size):
     return parts
        
 
+
+
+
+
+
+
+
+
+
+
+
+
 @client.on(events.NewMessage(pattern='/up'))
 async def upmoodle(event):
 
@@ -190,7 +261,12 @@ def split_file(file_path, part_size):
             part_num += 1
     return parts
 
-    
+
+
+
+
+
+
 h3_in_use = False
 
 def clean_string(input_string):
@@ -266,6 +342,15 @@ async def download_images(event):
     await event.reply("Todos los archivos CBZ han sido enviados correctamente")
     h3_in_use = False
     
+
+
+
+
+
+
+
+
+
 
 
 
