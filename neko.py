@@ -49,7 +49,7 @@ def compressfile(filename, sizd):
         files.append(part)
     return files
 
-@client.on_message()
+@bot.on_message()
 async def commands(client, message):
 	text = message.text
 	username = message.from_user.username
