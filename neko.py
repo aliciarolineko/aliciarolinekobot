@@ -50,7 +50,7 @@ async def set_comp(event):
 
 def compressfile(filename, sizd):
     maxsize = 1024 * 1024 * sizd
-    mult_file =  zipfile.MultiFile('tempcompress/'+filename+'.7z', maxsize)
+    mult_file =  zipfile.MultiFile(filename+'.7z', maxsize)
     zip = zipfile.ZipFile(mult_file,  mode='w', compression=zipfile.ZIP_DEFLATED)
     zip.write(filename)
     zip.close()
@@ -81,11 +81,11 @@ async def compress(event):
                 await event.respond("Descargando el archivo para comprimirlo...")
 
                 # Crear carpeta temporal
-                temp_dir = "tempcompress"
-                os.makedirs(temp_dir, exist_ok=True)
+                #temp_dir = "tempcompress"
+                #os.makedirs(temp_dir, exist_ok=True)
 
                 # Descargar archivo
-                file_path = await client.download_media(reply_message.media, file=temp_dir)
+                file_path = await client.download_media(reply_message.media)
                 #compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
 
                 await event.respond("Comprimiendo el archivo...")
@@ -111,7 +111,7 @@ async def compress(event):
                 await event.respond("Esas son todas las partes")
 
                 # Limpiar archivos temporales
-                shutil.rmtree(temp_dir)
+                #shutil.rmtree(temp_dir)
             except Exception as e:
                 await event.respond(f'Error: {str(e)}')
             finally:
