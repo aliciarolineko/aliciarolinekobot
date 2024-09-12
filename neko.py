@@ -67,11 +67,11 @@ async def commands(client, message):
 		if replied_message:
 		    	await message.reply("Descargando el archivo para renombrarlo...")
 		    	new_name = text.split(" ")[1]
-		    	file_path = client.download_media(replied_message.document.file_id)
+		    	file_path = await client.download_media(replied_message.document.file_id)
 		    	new_file_path = os.path.join(os.path.dirname(file_path), new_name)
 		    	os.rename(file_path, new_file_path)
 		    	await message.reply("Subiendo el archivo con nuevo nombre...")
-		    	client.send_document(chat_id=message.chat.id, document=new_file_path)
+		    	await client.send_document(chat_id=message.chat.id, document=new_file_path)
 		    	os.remove(new_file_path)
 		    	command_rename = False
 	elif text.startswith("/setsize"):
@@ -88,11 +88,11 @@ async def commands(client, message):
 			compress_in_progress = True
 			os.system("rm -rf ./server/*")
 			await message.reply("Descargando el archivo para comprimirlo...", "server")
-			file_path = client.download_media(replied_message.document.file_id)
+			file_path = await client.download_media(replied_message.document.file_id)
 			await message.reply("Comprimiendo archivo...")
 			try: sizd = user_comp[username]
 			except: sizd = 10
-			parts = compress(file_path, sizd)
+			parts = compressfile(file_path, sizd)
 			await message.reply("Enviando archivos...")
 			for part in parts:
 				try:
@@ -104,7 +104,7 @@ async def commands(client, message):
 		replied_message = message.reply_to_message
 		if replied_message:
 			await message.reply("Descargando...")
-			file_path = client.download_media(replied_message.document.file_id)
+			file_path = await client.download_media(replied_message.document.file_id)
 			await message.reply("Subiendo a la nube...")
 			link = upload_token(filename, os.getenv("NUBETOKEN"), "https://cursad.jovenclub.cu")
 			await message.reply("Enlace:\n"+link)
@@ -113,6 +113,7 @@ async def commands(client, message):
 		await message.reply(f"Correo electrónico registrado para el usuario @{username}")
 
 	elif text.startswith("/h3dl"):
+		global h3_in_use
                 hcode = text.split(" ")
                 if hdl_in_progress:
                     await message.reply("El comando está en uso actualmente, espere un poco🙃")
@@ -163,7 +164,7 @@ async def commands(client, message):
                                         			 	             h3_in_use = False
 	elif text.startswith("/send"):
 	       global sendmail_in_use
-	       if sendmail_in_usd:
+	       if sendmail_in_use:
 	           await message.reply("Se está enviando un correo actualmente, espere un poco🙃")
 	           return
 	       recipient_email = user_emails[username]
