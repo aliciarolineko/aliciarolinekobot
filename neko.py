@@ -195,19 +195,6 @@ async def rename(event):
 
     command_in_use = False
 
-def split_file(file_path, part_size):
-    parts = []
-    with open(file_path, 'rb') as f:
-        part_num = 0
-        while True:
-            part_data = f.read(part_size)
-            if not part_data:
-                break
-            part_file = f"{file_path}.part{part_num}"
-            with open(part_file, 'wb') as part_f:
-                part_f.write(part_data)
-                
-
 @client.on(events.NewMessage(pattern='/up'))
 async def upmoodle(event):
 
@@ -222,12 +209,23 @@ async def upmoodle(event):
                 await event.respond("Descargando el archivo para subir a moodle...")
                 filename = await client.download_media(reply_message.media)
                 await event.respond("Subiendo el archivo...")
-                moodle_token = os.getenv('MODDLETOKEN')
-                link = upload_token(filename, moodle_token, "https://cursad.jovenclub.cu")
-                await event.respond("Enlace:\n\n" + link)
+                link = upload_token(filename, "d68a63e9d524b62529133ff46268d331", "https://cursad.jovenclub.cu")
+                await event.respond("Enlace:\n\n"+link)
             except Exception as ex:
-                await event.respond(str(ex))
-         parts.append(part_file)
+                await event.respond(ex)
+
+def split_file(file_path, part_size):
+    parts = []
+    with open(file_path, 'rb') as f:
+        part_num = 0
+        while True:
+            part_data = f.read(part_size)
+            if not part_data:
+                break
+            part_file = f"{file_path}.part{part_num}"
+            with open(part_file, 'wb') as part_f:
+                part_f.write(part_data)
+            parts.append(part_file)
             part_num += 1
     return parts
 
@@ -410,4 +408,5 @@ async def send_mail(event):
     
 client.start()
 client.run_until_disconnected()
+
     
