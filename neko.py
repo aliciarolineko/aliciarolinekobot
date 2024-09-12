@@ -60,6 +60,24 @@ def compressfile(filename, sizd):
         files.append(part)
     return files
 
+import os
+import shutil
+
+# Define la carpeta que deseas limpiar
+download_folder = 'descargas'
+
+def clear_folder(folder):
+    if os.path.exists(folder):
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(e)
+
 @client.on(events.NewMessage(pattern='/compress'))
 async def compress(event):
     global compress_in_progress
@@ -85,7 +103,7 @@ async def compress(event):
                 #os.makedirs(temp_dir, exist_ok=True)
 
                 # Descargar archivo
-                file_path = await client.download_media(reply_message.media)
+                file_path = await client.download_media(reply_message.media, file="server")
                 #compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
 
                 await event.respond("Comprimiendo el archivo...")
@@ -109,7 +127,8 @@ async def compress(event):
                     await client.send_file(event.chat_id, part)
 
                 await event.respond("Esas son todas las partes")
-
+                clear_folder("server")
+            
                 # Limpiar archivos temporales
                 #shutil.rmtree(temp_dir)
             except Exception as e:
