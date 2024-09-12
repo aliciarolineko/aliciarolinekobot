@@ -13,6 +13,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 from moodleclient import upload_token
 
+from FastTelethon import download_file, upload_file
 
 # Configura tu API ID y Hash aquí
 api_id = os.getenv('API_ID')
@@ -166,7 +167,10 @@ async def compress(event):
                 #os.makedirs(temp_test_dir, exist_ok=True)
 
                 # Descargar archivo
-                file_path = await client.download_media(reply_message.media, file="server")
+                ###file_path = await client.download_media(reply_message.media, file="server")
+                file_path = reply_message.file.name
+                with open(file_path, "wb") as out:
+                    await download_file(event.client, reply_message.media, out)
 
                 # Comprimir archivo
                 #compressed_file = os.path.join(temp_test_dir, os.path.basename(file_path) + '.7z')
@@ -190,7 +194,9 @@ async def compress(event):
                 # Enviar partes
                 for part in parts:
                     try:
-                        await client.send_file(event.chat_id, part)
+                        #await client.send_file(event.chat_id, part)
+                        with open(part, "rb") as out:
+                            await upload_file(client, out)
                     except:pass
 
                 await event.respond("Esas son todas las partes")
