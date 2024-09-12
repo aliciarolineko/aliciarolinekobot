@@ -114,7 +114,7 @@ async def commands(client, message):
 
 	elif text.startswith("/h3dl"):
 		global h3_in_use
-                hcode = text.split(" ")
+		hcode = text.split(" ")
                 if hdl_in_progress:
                     await message.reply("El comando está en uso actualmente, espere un poco🙃")
                     return
