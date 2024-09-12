@@ -189,7 +189,9 @@ async def compress(event):
 
                 # Enviar partes
                 for part in parts:
-                    await client.send_file(event.chat_id, part)
+                    try:
+                        await client.send_file(event.chat_id, part)
+                    except:pass
 
                 await event.respond("Esas son todas las partes")
                 # Limpiar archivos temporales
