@@ -78,7 +78,6 @@ def clear_folder(folder):
             except Exception as e:
                 print(e)
 
-
 @client.on(events.NewMessage(pattern='/compress'))
 async def compress(event):
     global compress_in_progress
@@ -122,10 +121,12 @@ async def compress(event):
                 parts = split_file(compressed_file, sizd * 1024 * 1024)
                 await event.respond(f"Se ha comprimido el archivo en {len(parts)} partes, ahora se enviarán")
 
-                # Enviar partes y eliminar después de enviar
-                for part in parts:
-                    await client.send_file(event.chat_id, part)
-                    os.remove(part)  # Eliminar el archivo después de enviarlo
+                # Renombrar partes
+                for i, part in enumerate(parts):
+                    new_name = f"{os.path.basename(file_path)}.{str(i+1).zfill(3)}.7z"
+                    os.rename(part, new_name)
+                    await client.send_file(event.chat_id, new_name)
+                    os.remove(new_name)  # Eliminar el archivo después de enviarlo
 
                 await event.respond("Esas son todas las partes")
             
@@ -144,8 +145,10 @@ async def compress(event):
             await event.respond('Ejecute el comando respondiendo a un archivo')
     else:
         await event.respond('Ejecute el comando respondiendo a un archivo')
-    
+        
 
+
+   
 command_in_use2 = False
 
 @client.on(events.NewMessage(pattern='/rename (.+)'))
