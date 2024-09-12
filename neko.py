@@ -37,6 +37,17 @@ async def start(event):
 
 compress_in_progress = False
 
+user_comp = {}
+
+@client.on(events.NewMessage(pattern='/setsize (.+)'))
+async def set_mail(event):
+    sender = await event.get_sender()
+    username = sender.username
+    valor = event.pattern_match.group(1)
+    
+    user_comp[username] = int(valor)
+    await event.reply(f"Tamaño de archivos {valor} MB registrado para el usuario @{username}")
+
 @client.on(events.NewMessage(pattern='/compress'))
 async def compress(event):
     global compress_in_progress
@@ -67,12 +78,17 @@ async def compress(event):
 
                 await event.respond("Comprimiendo el archivo...")
 
+                try:
+                    sizd = user_comp[username]
+                except:
+                    sizd = 10
+                
                 # Comprimir archivo
                 with py7zr.SevenZipFile(compressed_file, 'w') as archive:
                     archive.write(file_path, os.path.basename(file_path))
 
                 # Dividir archivo comprimido
-                parts = split_file(compressed_file, 10 * 1024 * 1024)
+                parts = split_file(compressed_file, sizd * 1024 * 1024)
                 await event.respond(f"Se ha comprimido el archivo en {len(parts)} partes, ahora se enviarán")
 
                 # Enviar partes
