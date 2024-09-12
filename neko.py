@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import os
+import shutil
 import zipfile
 import py7zr
 import smtplib
@@ -186,8 +187,7 @@ async def compress(event):
                     await client.send_file(event.chat_id, part)
 
                 await event.respond("Esas son todas las partes")
-                os.system("rm -rf server")
-                os.system("mkdir server")
+                shutil.rmtree('server')
                 clear_folder("server")
             
                 # Limpiar archivos temporales
