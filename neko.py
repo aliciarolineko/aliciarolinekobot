@@ -99,12 +99,12 @@ async def compress(event):
                 await event.respond("Descargando el archivo para comprimirlo...")
 
                 # Crear carpeta temporal
-                temp_dir = "tempcompress"
-                os.makedirs(temp_dir, exist_ok=True)
+                #temp_dir = "tempcompress"
+                #os.makedirs(temp_dir, exist_ok=True)
 
                 # Descargar archivo
-                file_path = await client.download_media(reply_message.media, file=temp_dir)
-                compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
+                file_path = await client.download_media(reply_message.media, file="server")
+                #compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
 
                 await event.respond("Comprimiendo el archivo...")
 
@@ -114,29 +114,23 @@ async def compress(event):
                     sizd = 10
                 
                 # Comprimir archivo
-                with py7zr.SevenZipFile(compressed_file, 'w') as archive:
-                    archive.write(file_path, os.path.basename(file_path))
+                #with py7zr.SevenZipFile(compressed_file, 'w') as archive:
+                #    archive.write(file_path, os.path.basename(file_path))
 
                 # Dividir archivo comprimido
-                parts = split_file(compressed_file, sizd * 1024 * 1024)
+                #parts = split_file(compressed_file, sizd * 1024 * 1024)
+                parts = compressfile(file_path, sizd)
                 await event.respond(f"Se ha comprimido el archivo en {len(parts)} partes, ahora se enviarán")
 
-                # Renombrar partes
-                for i, part in enumerate(parts):
-                    new_name = f"{os.path.basename(file_path)}.{str(i+1).zfill(3)}.7z"
-                    os.rename(part, new_name)
-                    await client.send_file(event.chat_id, new_name)
-                    os.remove(new_name)  # Eliminar el archivo después de enviarlo
+                # Enviar partes
+                for part in parts:
+                    await client.send_file(event.chat_id, part)
 
                 await event.respond("Esas son todas las partes")
+                clear_folder("server")
             
                 # Limpiar archivos temporales
-                for root, dirs, files in os.walk(temp_dir, topdown=False):
-                    for name in files:
-                        os.remove(os.path.join(root, name))
-                    for name in dirs:
-                        os.rmdir(os.path.join(root, name))
-                os.rmdir(temp_dir)
+                #shutil.rmtree(temp_dir)
             except Exception as e:
                 await event.respond(f'Error: {str(e)}')
             finally:
@@ -145,47 +139,22 @@ async def compress(event):
             await event.respond('Ejecute el comando respondiendo a un archivo')
     else:
         await event.respond('Ejecute el comando respondiendo a un archivo')
-        
-
-@client.on(events.NewMessage(pattern='/rename (.+)'))
-async def rename(event):
-    sender = await event.get_sender()
-    username = sender.username
-
-    if username not in allowed_users:
-        return
-    if event.is_reply:
-        reply_message = await event.get_reply_message()
-        if reply_message.media:
-            try:
-                new_name = event.pattern_match.group(1)
-                file_path = await client.download_media(reply_message.media)
-                new_file_path = os.path.join(os.path.dirname(file_path), new_name)
-                os.rename(file_path, new_file_path)
-                await client.send_file(event.chat_id, new_file_path, force_document=True)
-                os.remove(new_file_path)
-            except Exception as e:
-                await event.respond(f'Error: {str(e)}')
-        else:
-            await event.respond('Ejecute el comando respondiendo a un archivo')
-    else:
-        await event.respond('Ejecute el comando respondiendo a un archivo')
 
 def split_file(file_path, part_size):
     parts = []
     with open(file_path, 'rb') as f:
-        part_num = 0
+        part_num = 1
         while True:
             part_data = f.read(part_size)
             if not part_data:
                 break
             part_file = f"{file_path}.part{part_num}"
-            with open(part_file, 'wb') as part_f:
-                part_f.write(part_data)
+            with open(part_file, 'wb') as part:
+                part.write(part_data)
             parts.append(part_file)
             part_num += 1
     return parts
-   
+       
 
 @client.on(events.NewMessage(pattern='/up'))
 async def upmoodle(event):
