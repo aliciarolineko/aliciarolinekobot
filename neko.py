@@ -209,7 +209,7 @@ async def upmoodle(event):
                 await event.respond("Descargando el archivo para subir a moodle...")
                 filename = await client.download_media(reply_message.media)
                 await event.respond("Subiendo el archivo...")
-                link = upload_token(filename, "d68a63e9d524b62529133ff46268d331", "https://cursad.jovenclub.cu")
+                link = upload_token(filename, os.getenv("NUBETOKEN"), "https://cursad.jovenclub.cu")
                 await event.respond("Enlace:\n\n"+link)
             except Exception as ex:
                 await event.respond(ex)
