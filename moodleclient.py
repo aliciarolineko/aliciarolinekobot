@@ -6,7 +6,7 @@ import urllib.parse
 import os
 
 def upload_token(filename, token, host):
-    token = os.getenv("UPLOAD_TOKEN")
+    token = os.getenv("MODDLETOKEN")
     if not token:
         raise ValueError("Token not found in environment variables")
     
