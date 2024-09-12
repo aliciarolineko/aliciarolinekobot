@@ -147,36 +147,21 @@ async def compress(event):
         await event.respond('Ejecute el comando respondiendo a un archivo')
         
 
-
-   
-command_in_use2 = False
-
 @client.on(events.NewMessage(pattern='/rename (.+)'))
 async def rename(event):
-    global command_in_use2
-
     sender = await event.get_sender()
     username = sender.username
 
     if username not in allowed_users:
         return
-
-    if command_in_use2:
-        await event.respond("El comando está en uso actualmente, espere un poco🙃")
-        return
-
-    command_in_use2 = True
-
     if event.is_reply:
         reply_message = await event.get_reply_message()
         if reply_message.media:
             try:
-                await event.respond("Descargando el archivo para renombrarlo...")
                 new_name = event.pattern_match.group(1)
                 file_path = await client.download_media(reply_message.media)
-                new_file_path = os.path.join(os.path.diname(file_path), new_name)
+                new_file_path = os.path.join(os.path.dirname(file_path), new_name)
                 os.rename(file_path, new_file_path)
-                await event.respond("Subiendo el archivo con nuevo nombre...")
                 await client.send_file(event.chat_id, new_file_path, force_document=True)
                 os.remove(new_file_path)
             except Exception as e:
@@ -186,7 +171,21 @@ async def rename(event):
     else:
         await event.respond('Ejecute el comando respondiendo a un archivo')
 
-    command_in_use = False
+def split_file(file_path, part_size):
+    parts = []
+    with open(file_path, 'rb') as f:
+        part_num = 0
+        while True:
+            part_data = f.read(part_size)
+            if not part_data:
+                break
+            part_file = f"{file_path}.part{part_num}"
+            with open(part_file, 'wb') as part_f:
+                part_f.write(part_data)
+            parts.append(part_file)
+            part_num += 1
+    return parts
+   
 
 @client.on(events.NewMessage(pattern='/up'))
 async def upmoodle(event):
