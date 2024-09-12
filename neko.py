@@ -9,7 +9,7 @@ import py7zr
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
+from email.mime.base import MIMEBase 
 from email import encoders
 from moodleclient import upload_token
 
@@ -159,12 +159,16 @@ async def compress(event):
                 await event.respond("Descargando el archivo para comprimirlo...")
 
                 # Crear carpeta temporal
-                #temp_dir = "tempcompress"
-                os.makedirs("server/test", exist_ok=True)
+                temp_dir = "server/tempcompress"
+                os.makedirs(temp_dir, exist_ok=True)
+                temp_test_dir = os.path.join(temp_dir, "test")
+                os.makedirs(temp_test_dir, exist_ok=True)
 
                 # Descargar archivo
-                file_path = await client.download_media(reply_message.media, file="server/test")
-                #compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
+                file_path = await client.download_media(reply_message.media, file=temp_test_dir)
+
+                # Comprimir archivo
+                compressed_file = os.path.join(temp_test_dir, os.path.basename(file_path) + '.7z')
 
                 await event.respond("Comprimiendo el archivo...")
 
@@ -172,14 +176,13 @@ async def compress(event):
                     sizd = user_comp[username]
                 except:
                     sizd = 10
-                
+
                 # Comprimir archivo
-                #with py7zr.SevenZipFile(compressed_file, 'w') as archive:
-                #    archive.write(file_path, os.path.basename(file_path))
+                with py7zr.SevenZipFile(compressed_file, 'w') as archive:
+                    archive.write(file_path, os.path.basename(file_path))
 
                 # Dividir archivo comprimido
-                #parts = split_file(compressed_file, sizd * 1024 * 1024)
-                parts = compressfile(file_path, sizd)
+                parts = split_file(compressed_file, sizd * 1024 * 1024)
                 await event.respond(f"Se ha comprimido el archivo en {len(parts)} partes, ahora se enviarán")
 
                 # Enviar partes
@@ -187,13 +190,15 @@ async def compress(event):
                     await client.send_file(event.chat_id, part)
 
                 await event.respond("Esas son todas las partes")
-                os.system("rm -rf server/test")
-                os.makedirs('server/test', exist_ok=True)
-                #shutil.rmtree('server/test')
-                #clear_folder("server")
-            
                 # Limpiar archivos temporales
-                #shutil.rmtree(temp_dir)
+                for root, dirs, files in os.walk(temp_dir):
+                    for file in files:
+                        os.remove(os.path.join(root, file))
+                for root, dirs in os.walk(temp_dir):
+                    if dirs:
+                        os.rmdir(root)
+
+                compress_in_progress = False
             except Exception as e:
                 await event.respond(f'Error: {str(e)}')
             finally:
@@ -216,8 +221,7 @@ def split_file(file_path, part_size):
                 part.write(part_data)
             parts.append(part_file)
             part_num += 1
-    return parts
-       
+    return parts       
 
 
 
