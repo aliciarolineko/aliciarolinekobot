@@ -187,7 +187,7 @@ async def compress(event):
                     await client.send_file(event.chat_id, part)
 
                 await event.respond("Esas son todas las partes")
-                shutil.rmtree('server/test')
+                #shutil.rmtree('server/test')
                 #clear_folder("server")
             
                 # Limpiar archivos temporales
