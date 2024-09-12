@@ -163,7 +163,7 @@ async def compress(event):
                 #os.makedirs(temp_dir, exist_ok=True)
 
                 # Descargar archivo
-                file_path = await client.download_media(reply_message.media, file="server")
+                file_path = await client.download_media(reply_message.media, file="server/test")
                 #compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
 
                 await event.respond("Comprimiendo el archivo...")
@@ -187,7 +187,7 @@ async def compress(event):
                     await client.send_file(event.chat_id, part)
 
                 await event.respond("Esas son todas las partes")
-                shutil.rmtree('server')
+                shutil.rmtree('server/test')
                 clear_folder("server")
             
                 # Limpiar archivos temporales
