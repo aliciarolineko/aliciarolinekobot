@@ -187,6 +187,8 @@ async def compress(event):
                     await client.send_file(event.chat_id, part)
 
                 await event.respond("Esas son todas las partes")
+                os.system("rm -rf server/test")
+                os.makedirs('server/test', exist_ok=True)
                 #shutil.rmtree('server/test')
                 #clear_folder("server")
             
