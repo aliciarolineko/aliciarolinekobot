@@ -5,7 +5,7 @@ from random import randint
 import urllib.parse
 import os
 
-def upload_token(filename, host):
+def upload_token(filename, token, host):
     token = os.getenv("UPLOAD_TOKEN")
     if not token:
         raise ValueError("Token not found in environment variables")
