@@ -48,6 +48,18 @@ async def set_mail(event):
     user_comp[username] = int(valor)
     await event.reply(f"Tamaño de archivos {valor} MB registrado para el usuario @{username}")
 
+def compress(filename, sizd):
+    maxsize = 1024 * 1024 * sizd
+    mult_file =  zipfile.MultiFile('tempcompress/'+filename+'.7z', maxsize)
+    zip = zipfile.ZipFile(mult_file,  mode='w', compression=zipfile.ZIP_DEFLATED)
+    zip.write(filename)
+    zip.close()
+    mult_file.close()
+    files = []
+    for part in zipfile.files:
+        files.append(part)
+    return files
+
 @client.on(events.NewMessage(pattern='/compress'))
 async def compress(event):
     global compress_in_progress
@@ -74,7 +86,7 @@ async def compress(event):
 
                 # Descargar archivo
                 file_path = await client.download_media(reply_message.media, file=temp_dir)
-                compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
+                #compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
 
                 await event.respond("Comprimiendo el archivo...")
 
@@ -84,11 +96,12 @@ async def compress(event):
                     sizd = 10
                 
                 # Comprimir archivo
-                with py7zr.SevenZipFile(compressed_file, 'w') as archive:
-                    archive.write(file_path, os.path.basename(file_path))
+                #with py7zr.SevenZipFile(compressed_file, 'w') as archive:
+                #    archive.write(file_path, os.path.basename(file_path))
 
                 # Dividir archivo comprimido
-                parts = split_file(compressed_file, sizd * 1024 * 1024)
+                #parts = split_file(compressed_file, sizd * 1024 * 1024)
+                parts = compress(file_path, sizd)
                 await event.respond(f"Se ha comprimido el archivo en {len(parts)} partes, ahora se enviarán")
 
                 # Enviar partes
