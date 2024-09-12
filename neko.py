@@ -160,7 +160,7 @@ async def compress(event):
 
                 # Crear carpeta temporal
                 #temp_dir = "tempcompress"
-                #os.makedirs(temp_dir, exist_ok=True)
+                os.makedirs("server/test", exist_ok=True)
 
                 # Descargar archivo
                 file_path = await client.download_media(reply_message.media, file="server/test")
@@ -188,7 +188,7 @@ async def compress(event):
 
                 await event.respond("Esas son todas las partes")
                 shutil.rmtree('server/test')
-                clear_folder("server")
+                #clear_folder("server")
             
                 # Limpiar archivos temporales
                 #shutil.rmtree(temp_dir)
