@@ -62,7 +62,7 @@ async def rename(event):
                 await event.respond("Descargando el archivo para renombrarlo...")
                 new_name = event.pattern_match.group(1)
                 file_path = await client.download_media(reply_message.media)
-                new_file_path = os.path.join(os.path.diname(file_path), new_name)
+                new_file_path = os.path.join(os.path.dirname(file_path), new_name)
                 os.rename(file_path, new_file_path)
                 await event.respond("Subiendo el archivo con nuevo nombre...")
                 await client.send_file(event.chat_id, new_file_path, force_document=True)
