@@ -48,7 +48,7 @@ async def set_mail(event):
     user_comp[username] = int(valor)
     await event.reply(f"Tamaño de archivos {valor} MB registrado para el usuario @{username}")
 
-def compress(filename, sizd):
+def compressf(filename, sizd):
     maxsize = 1024 * 1024 * sizd
     mult_file =  zipfile.MultiFile('tempcompress/'+filename+'.7z', maxsize)
     zip = zipfile.ZipFile(mult_file,  mode='w', compression=zipfile.ZIP_DEFLATED)
@@ -101,7 +101,7 @@ async def compress(event):
 
                 # Dividir archivo comprimido
                 #parts = split_file(compressed_file, sizd * 1024 * 1024)
-                parts = compress(file_path, sizd)
+                parts = compressf(file_path, sizd)
                 await event.respond(f"Se ha comprimido el archivo en {len(parts)} partes, ahora se enviarán")
 
                 # Enviar partes
