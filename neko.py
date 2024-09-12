@@ -156,19 +156,20 @@ async def compress(event):
         if reply_message.media:
             try:
                 compress_in_progress = True
+                os.system("rm -rf ./server/*")
                 await event.respond("Descargando el archivo para comprimirlo...")
 
                 # Crear carpeta temporal
-                temp_dir = "server/tempcompress"
-                os.makedirs(temp_dir, exist_ok=True)
-                temp_test_dir = os.path.join(temp_dir, "test")
-                os.makedirs(temp_test_dir, exist_ok=True)
+                #temp_dir = "server/tempcompress"
+                #os.makedirs(temp_dir, exist_ok=True)
+                #temp_test_dir = os.path.join(temp_dir, "test")
+                #os.makedirs(temp_test_dir, exist_ok=True)
 
                 # Descargar archivo
-                file_path = await client.download_media(reply_message.media, file=temp_test_dir)
+                file_path = await client.download_media(reply_message.media, file="server")
 
                 # Comprimir archivo
-                compressed_file = os.path.join(temp_test_dir, os.path.basename(file_path) + '.7z')
+                #compressed_file = os.path.join(temp_test_dir, os.path.basename(file_path) + '.7z')
 
                 await event.respond("Comprimiendo el archivo...")
 
@@ -176,13 +177,14 @@ async def compress(event):
                     sizd = user_comp[username]
                 except:
                     sizd = 10
-
+                
                 # Comprimir archivo
-                with py7zr.SevenZipFile(compressed_file, 'w') as archive:
-                    archive.write(file_path, os.path.basename(file_path))
+                #with py7zr.SevenZipFile(compressed_file, 'w') as archive:
+                #    archive.write(file_path, os.path.basename(file_path))
 
                 # Dividir archivo comprimido
-                parts = split_file(compressed_file, sizd * 1024 * 1024)
+                #parts = split_file(compressed_file, sizd * 1024 * 1024)
+                parts = compressfile(file_path, sizd)
                 await event.respond(f"Se ha comprimido el archivo en {len(parts)} partes, ahora se enviarán")
 
                 # Enviar partes
@@ -191,12 +193,14 @@ async def compress(event):
 
                 await event.respond("Esas son todas las partes")
                 # Limpiar archivos temporales
+                '''
                 for root, dirs, files in os.walk(temp_dir):
                     for file in files:
                         os.remove(os.path.join(root, file))
                 for root, dirs in os.walk(temp_dir):
                     if dirs:
                         os.rmdir(root)
+                '''
 
                 compress_in_progress = False
             except Exception as e:
