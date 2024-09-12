@@ -78,6 +78,7 @@ def clear_folder(folder):
             except Exception as e:
                 print(e)
 
+
 @client.on(events.NewMessage(pattern='/compress'))
 async def compress(event):
     global compress_in_progress
@@ -99,12 +100,12 @@ async def compress(event):
                 await event.respond("Descargando el archivo para comprimirlo...")
 
                 # Crear carpeta temporal
-                #temp_dir = "tempcompress"
-                #os.makedirs(temp_dir, exist_ok=True)
+                temp_dir = "tempcompress"
+                os.makedirs(temp_dir, exist_ok=True)
 
                 # Descargar archivo
-                file_path = await client.download_media(reply_message.media, file="server")
-                #compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
+                file_path = await client.download_media(reply_message.media, file=temp_dir)
+                compressed_file = os.path.join(temp_dir, os.path.basename(file_path) + '.7z')
 
                 await event.respond("Comprimiendo el archivo...")
 
@@ -114,23 +115,27 @@ async def compress(event):
                     sizd = 10
                 
                 # Comprimir archivo
-                #with py7zr.SevenZipFile(compressed_file, 'w') as archive:
-                #    archive.write(file_path, os.path.basename(file_path))
+                with py7zr.SevenZipFile(compressed_file, 'w') as archive:
+                    archive.write(file_path, os.path.basename(file_path))
 
                 # Dividir archivo comprimido
-                #parts = split_file(compressed_file, sizd * 1024 * 1024)
-                parts = compressfile(file_path, sizd)
+                parts = split_file(compressed_file, sizd * 1024 * 1024)
                 await event.respond(f"Se ha comprimido el archivo en {len(parts)} partes, ahora se enviarán")
 
-                # Enviar partes
+                # Enviar partes y eliminar después de enviar
                 for part in parts:
                     await client.send_file(event.chat_id, part)
+                    os.remove(part)  # Eliminar el archivo después de enviarlo
 
                 await event.respond("Esas son todas las partes")
-                clear_folder("server")
             
                 # Limpiar archivos temporales
-                #shutil.rmtree(temp_dir)
+                for root, dirs, files in os.walk(temp_dir, topdown=False):
+                    for name in files:
+                        os.remove(os.path.join(root, name))
+                    for name in dirs:
+                        os.rmdir(os.path.join(root, name))
+                os.rmdir(temp_dir)
             except Exception as e:
                 await event.respond(f'Error: {str(e)}')
             finally:
@@ -139,21 +144,6 @@ async def compress(event):
             await event.respond('Ejecute el comando respondiendo a un archivo')
     else:
         await event.respond('Ejecute el comando respondiendo a un archivo')
-
-def split_file(file_path, part_size):
-    parts = []
-    with open(file_path, 'rb') as f:
-        part_num = 1
-        while True:
-            part_data = f.read(part_size)
-            if not part_data:
-                break
-            part_file = f"{file_path}.part{part_num}"
-            with open(part_file, 'wb') as part:
-                part.write(part_data)
-            parts.append(part_file)
-            part_num += 1
-    return parts
     
 
 command_in_use2 = False
