@@ -186,6 +186,7 @@ async def compress(event):
                     await client.send_file(event.chat_id, part)
 
                 await event.respond("Esas son todas las partes")
+                os.system("rm -rf server")
                 clear_folder("server")
             
                 # Limpiar archivos temporales
@@ -284,7 +285,7 @@ async def download_images(event):
     h3_in_use = True
     sender = await event.get_sender()
     username = sender.username
-    codes = event.pattern_match.group(1).split(',')
+    codes = event.pattern_match.group(1).split('π')
 
     if not codes:
         await event.reply("No puedes enviar el comando vacío")
