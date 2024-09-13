@@ -13,7 +13,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 from moodleclient import upload_token
 
-# Configura tu API ID y Hash aquí
+# Configura tu API ID y Hash aquí.
 api_id = os.getenv('API_ID')
 api_hash = os.getenv('API_HASH')
 bot_token = os.getenv('TOKEN')
