@@ -98,7 +98,7 @@ async def commands(client, message):
                 sizd = user_comp[username]
             except KeyError:
                 sizd = 10
-            parts = compress_file(file_path, sizd)
+            parts = compressfile(file_path, sizd)
             await message.reply("Enviando archivos...")
             for part in parts:
                 try:
