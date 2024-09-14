@@ -31,7 +31,7 @@ DISPASS = os.getenv('DISPASS')
 
 sendmail_in_use = False
 command_rename = False
-compress_in_progress = False
+#compress_in_progress = False
 h3_in_use = False
 
 user_comp = {}
@@ -83,10 +83,10 @@ async def commands(client, message):
         await message.reply(f"Tamaño de archivos {valor}MB registrado para el usuario @{username}")
     
     elif text.startswith("/compress"):
-        global compress_in_progress
-        if compress_in_progress:
-            await message.reply("El comando está en uso actualmente, espere un poco 🙃")
-            return
+        #global compress_in_progress
+        #if compress_in_progress:
+        #   await message.reply("El comando está en uso actualmente, espere un poco 🙃")
+        #   return
         replied_message = message.reply_to_message
         if replied_message:
             compress_in_progress = True
