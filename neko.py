@@ -114,8 +114,8 @@ async def commands(client, message):
             await message.reply("Descargando...")
             file_path = await client.download_media(replied_message.document.file_id)
             await message.reply("Subiendo a la nube...")
-            link = upload_token(file_path, os.getenv("NUBETOKEN"), "https://cursad.jovenclub.cu")
-            await message.reply("Enlace:\n" + link)
+            link = upload_token(file_path, os.getenv("NUBETOKEN"), "https://aulavirtual.upec.cu")
+            await message.reply("Enlace:\n" + str(link).replace("/webservice", ""))
 
     elif text.startswith("/setmail"):
         user_emails[username] = text.split(" ")[1]
